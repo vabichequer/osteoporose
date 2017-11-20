@@ -11,6 +11,8 @@ from sklearn.preprocessing import normalize
 from sklearn.neural_network import MLPClassifier
 from sklearn.model_selection import cross_val_score
 from sklearn.feature_extraction import image
+from keras.models import Sequential
+from keras.layers import Dense
 import csv
 
 PERCENTILES = [1, 10, 25, 75, 90, 99]
@@ -121,15 +123,26 @@ for i in range(0, 29):
 featuresTreino = np.array(featuresTreino)
 featuresTeste = np.array(featuresTeste)
 	
-csv_file = open("resultadosMCO.csv", 'wb')
-writer = csv.writer(csv_file)
-writer.writerow(["LBFGS", "VC", "SGD", "VC", "ADAM", "VC"])
-	
-print("\n###########################################################\n#")
-cross_val_lbfgs = avaliar("lbfgs", featuresTreino, targetTreino, featuresTeste, targetTeste)
-print("#\n#----------------------------------------------------------\n#")
-cross_val_sgd = avaliar("sgd", featuresTreino, targetTreino, featuresTeste, targetTeste)
-print("#\n#----------------------------------------------------------\n#")
-cross_val_adam = avaliar("adam", featuresTreino, targetTreino, featuresTeste, targetTeste)
-writer.writerow(["", cross_val_lbfgs, "", cross_val_sgd, "", cross_val_adam])
-print("#\n###########################################################\n")
+# csv_file = open("resultadosMCO.csv", 'wb')
+# writer = csv.writer(csv_file)
+# writer.writerow(["LBFGS", "VC", "SGD", "VC", "ADAM", "VC"])
+
+# print("\n###########################################################\n#")
+# cross_val_lbfgs = avaliar("lbfgs", featuresTreino, targetTreino, featuresTeste, targetTeste)
+# print("#\n#----------------------------------------------------------\n#")
+# cross_val_sgd = avaliar("sgd", featuresTreino, targetTreino, featuresTeste, targetTeste)
+# print("#\n#----------------------------------------------------------\n#")
+# cross_val_adam = avaliar("adam", featuresTreino, targetTreino, featuresTeste, targetTeste)
+# writer.writerow(["", cross_val_lbfgs, "", cross_val_sgd, "", cross_val_adam])
+# print("#\n###########################################################\n")
+
+model.add(Dense(units=64, activation='relu', input_dim=100))
+model.add(Dense(units=10, activation='softmax'))
+model.compile(loss='categorical_crossentropy',
+              optimizer='sgd',
+              metrics=['accuracy'])
+model.compile(loss=keras.losses.categorical_crossentropy,
+              optimizer=keras.optimizers.SGD(lr=0.01, momentum=0.9, nesterov=True))
+model.train_on_batch(featuresTreino, targetTreino)
+loss_and_metrics = model.evaluate(featuresTeste, targetTeste, batch_size=128)
+classes = model.predict(featuresTeste, batch_size=128)
